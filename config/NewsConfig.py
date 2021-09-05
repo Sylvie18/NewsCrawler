@@ -2,6 +2,7 @@ import os
 
 PROD, TEST = range(2)
 
+# for test, let CURRENT_PROFILE = TEST config
 CURRENT_PROFILE = PROD
 
 CURRENT_CONFIG = [
@@ -9,10 +10,10 @@ CURRENT_CONFIG = [
         # prod
         # Get your Twitter API credentials and enter them here
         TWITTER_DEV=dict(
-            CONSUMER_KEY="",
-            CONSUMER_SECRET="",
-            ACCESS_KEY="",
-            ACCESS_SECRET="",
+            CONSUMER_KEY="CONSUMER_KEY",
+            CONSUMER_SECRET="CONSUMER_SECRET",
+            ACCESS_KEY="YOUR ACCESS_KEY",
+            ACCESS_SECRET="YOUR ACCESS_SECRET",
         ),
 
         SOLR_URL='',
@@ -28,11 +29,10 @@ CURRENT_CONFIG = [
         # TEST
         # Get your Twitter API credentials and enter them here
         TWITTER_DEV=dict(
-            CONSUMER_KEY="",
-            CONSUMER_SECRET="",
-            ACCESS_KEY="",
-            ACCESS_SECRET="",
-            BEARER_TOKEN=""
+            CONSUMER_KEY="CONSUMER_KEY",
+            CONSUMER_SECRET="CONSUMER_SECRET",
+            ACCESS_KEY="YOUR ACCESS_KEY",
+            ACCESS_SECRET="YOUR ACCESS_SECRET",
         ),
 
         SOLR_URL='',

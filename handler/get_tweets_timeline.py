@@ -17,6 +17,11 @@ api_auth = developer_config.api_auth
 
 
 def extended_tweet(tweet_id):
+    """
+    using tweet id to collect full text and extract URL to the original article
+    :param tweet_id:
+    :return:
+    """
     try:
         status = api_auth.get_status(tweet_id, tweet_mode="extended")
     except Exception as e:
@@ -34,11 +39,19 @@ def extended_tweet(tweet_id):
 
 
 def get_tweets_daily(since_id, max_id, startdate, enddate, screen_name):
+    """
+    Getting tweets
+    :param since_id: not used for now
+    :param max_id: not used for now
+    :param startdate: start date
+    :param enddate: end date
+    :param screen_name: Twitter account user screen name
+    :return:
+    """
     tweets_for_csv = []
     counter = 1
     begin = time.time()
     global api_auth
-    # for tweet in tweepy.Cursor(api_auth.user_timeline, tweet_mode="extended", since_id=since_id, max_id=max_id, screen_name=screen_name).items():
     try:
         for tweet in tweepy.Cursor(api_auth.user_timeline, tweet_mode="extended", screen_name=screen_name).items():
 
@@ -49,25 +62,22 @@ def get_tweets_daily(since_id, max_id, startdate, enddate, screen_name):
                     print("round: " + str(counter / 100) + "  time spent: " + str(round_end - begin))
                 full_text, url = extended_tweet(tweet.id)
                 tweets_for_csv.append([screen_name, tweet.id, full_text, url, json.dumps(tweet._json)])
-                # print(tweets_for_csv[-1])
             elif tweet.created_at < startdate:
-                # print(tweet.created_at)
                 break
             else:
-                # print(tweet.created_at)
                 continue
     except tweepy.error.TweepError as e:
         print(e)
         print("Switching to new api_auth and sleep for 90 seconds......")
         time.sleep(90)
         new_developer_config = DeveloperConfig(consumer_key, consumer_secret, access_key, access_secret)
-        # global api_auth
         api_auth = new_developer_config.api_auth
         get_tweets_daily(since_id, max_id, startdate, enddate, screen_name)
         return
     # timestamp = str(datetime.datetime.today().date()).replace('-', '_')
     timestamp = str(startdate.date()).replace('-', '_')
 
+    # save tweets to csv
     folder_path = CURRENT_CONFIG['TWEETS_4HOUR_PATH'] + timestamp + "/"
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -86,6 +96,11 @@ def get_tweets_daily(since_id, max_id, startdate, enddate, screen_name):
 
 
 def get_news_account(filepath):
+    """
+    reading Twitter news agencies to list
+    :param filepath:
+    :return:
+    """
     accounts = []
     with open(filepath, encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
@@ -97,6 +112,11 @@ def get_news_account(filepath):
 
 
 def get_zero_time(offset=1):
+    """
+    Getting current date 00:00:00
+    :param offset:
+    :return:
+    """
     now = datetime.datetime.now()
     zero_date = now - datetime.timedelta(hours=now.hour, minutes=now.minute, seconds=now.second,
                                          microseconds=now.microsecond)
@@ -106,11 +126,16 @@ def get_zero_time(offset=1):
 
 
 def generate_time(offset=1, block=6):
+    """
+    generate time period for each day, here block = 6, so period = 24h/6 = 4 hours
+    :param offset: the date we want to generate, offset = 1 which means it's yesterday
+    :param block:
+    :return:
+    """
     length_time = 24 / block
     now = datetime.datetime.now()
     zero_date = now - datetime.timedelta(hours=now.hour, minutes=now.minute, seconds=now.second,
                                          microseconds=now.microsecond)
-    # end_date = zero_date - datetime.timedelta(days=offset - 1)
     start_date = zero_date - datetime.timedelta(days=offset)
     end_time = start_date + datetime.timedelta(hours=length_time)
     time_list = [[start_date, end_time]]
@@ -122,6 +147,10 @@ def generate_time(offset=1, block=6):
 
 
 def get_time_slot(offset=0):
+    """
+    :param offset:
+    :return:
+    """
     time_list_yesterday = generate_time(offset=offset+1)
     time_list_today = generate_time(offset=offset)
     current_time = datetime.datetime.now()
@@ -136,7 +165,10 @@ def get_time_slot(offset=0):
 
 
 def job_get_tweets():
-    # time.sleep(1000)
+    """
+    job for getting tweets,
+    :return:
+    """
     print('daily_get_tweets_job starting: ' + str(datetime.datetime.now().strftime('_%Y%m%d_%H%M%S')))
     news_accounts_path = '../data/TwitterNewsAgencies.csv'
     dates = [1]
@@ -151,8 +183,11 @@ def job_get_tweets():
                 print(e)
     return
 
-# if __name__ == '__main__':
+
 if __name__ == '__main__':
+    """
+    Test for functions
+    """
     scheduler = BlockingScheduler()
     job_get_tweets()
     scheduler.add_job(job_get_tweets, 'cron', hour=00, minute=2,

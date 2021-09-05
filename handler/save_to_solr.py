@@ -6,13 +6,24 @@ import datetime
 import pandas as pd
 from config.NewsConfig import *
 
+
 def tweets_save_solr(record_list):
+    """
+    upload records to solr
+    :param record_list:
+    :return:
+    """
     url = CURRENT_CONFIG['SOLR_URL']
     solr = pysolr.Solr(url, timeout=180)
     solr.add(record_list, softCommit=True)
 
 
 def convert_time(dd):
+    """
+    convert current time format to fit SOLR time format
+    :param dd:
+    :return:
+    """
     # dd = "Tue Jun 22 23:42:35 +0000 2021"
     GMT_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
     # YYYY-MM-DDTHH:mm:ssZ
@@ -22,6 +33,12 @@ def convert_time(dd):
 
 
 def tweets_parse(tweet_path, article_path):
+    """
+    parse tweets and articles and then combine them to a single record
+    :param tweet_path: collected tweet path
+    :param article_path: collected article path
+    :return:
+    """
     for file in os.listdir(tweet_path):
         if not file.endswith('.csv'):
             continue
@@ -68,10 +85,14 @@ def tweets_parse(tweet_path, article_path):
         tweets_save_solr(tweets_list)
 
 
-def create_solr(date):
-    
-    tweet_path = CURRENT_CONFIG['TWEETS_4HOUR_PATH']+ date + '/'
-    article_path = CURRENT_CONFIG['ARTICLE_PATH']+ date + '/'
+def create_solr(timestamp):
+    """
+    creating solr and upload records
+    :param timestamp:
+    :return:
+    """
+    tweet_path = CURRENT_CONFIG['TWEETS_4HOUR_PATH'] + timestamp + '/'
+    article_path = CURRENT_CONFIG['ARTICLE_PATH'] + timestamp + '/'
 
     tweets_parse(tweet_path, article_path)
 
